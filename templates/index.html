@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 450px;
+            max-width: 90%;
+            height: 600px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .user-message {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .bot-message {
+            background: #e9ecef;
+            color: #333333;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        .input-area {
+            display: flex;
+            border-top: 1px solid #eeeeee;
+            padding: 10px;
+            background: white;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .input-area button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            margin-left: 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .input-area button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">PDF Chatbot</div>
+    <div class="chat-box" id="chatBox">
+        <div class="message bot-message">Hello! Upload a PDF and type a message below to start chatting with me.</div>
+    </div>
+    <div class="input-area">
+        <!-- New Upload Button -->
+        <input type="file" id="pdfUpload" accept="application/pdf" style="display:none;" onchange="uploadPDF(event)">
+        <button onclick="document.getElementById('pdfUpload').click()">Upload PDF</button>
+        
+        <!-- Existing Input -->
+        <input type="text" id="userInput" placeholder="Type your message here..." 
+               onkeydown="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+
+let pdfUploaded = false;
+
+/* Add message to chat window */
+function addMessage(text, type) {
+    const chatBox = document.getElementById("chatBox");
+
+    const div = document.createElement("div");
+    div.className = `message ${type}`;
+    div.textContent = text;
+
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+/* Upload PDF */
+async function uploadPDF(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+        alert("Please select a valid PDF file.");
+        return;
+    }
+
+    addMessage(`Uploaded PDF: ${file.name}`, "user-message");
+
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    try {
+
+        const response = await fetch("/upload_pdf", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            pdfUploaded = true;
+            addMessage(
+                data.response || "PDF uploaded successfully.",
+                "bot-message"
+            );
+        } else {
+            pdfUploaded = false;
+            addMessage(
+                data.error || "Failed to upload PDF.",
+                "bot-message"
+            );
+        }
+
+    } catch (error) {
+
+        pdfUploaded = false;
+
+        addMessage(
+            "Error: Could not upload PDF.",
+            "bot-message"
+        );
+
+        console.error(error);
+    }
+}
+
+
+/* Send Chat Message */
+async function sendMessage() {
+
+    const inputField = document.getElementById("userInput");
+    const messageText = inputField.value.trim();
+
+    if (messageText === "") return;
+
+    if (!pdfUploaded) {
+        addMessage(
+            "Please upload a PDF before asking questions.",
+            "bot-message"
+        );
+        return;
+    }
+
+    addMessage(messageText, "user-message");
+
+    inputField.value = "";
+
+    try {
+
+        const response = await fetch("/get_response", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: messageText
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            addMessage(
+                data.response,
+                "bot-message"
+            );
+        } else {
+            addMessage(
+                data.error || "Something went wrong.",
+                "bot-message"
+            );
+        }
+
+    } catch (error) {
+
+        addMessage(
+            "Error: Could not connect to backend server.",
+            "bot-message"
+        );
+
+        console.error(error);
+    }
+}
+
+</script>
+
+</body>
+</html>
