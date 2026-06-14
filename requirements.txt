@@ -1,0 +1,7 @@
+Flask
+langchain 
+langchain-openai
+langchain-community
+langchain-text-splitters
+chromadb
+langchain-core
