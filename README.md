@@ -4,13 +4,6 @@ An AI-powered Retrieval-Augmented Generation (RAG) chatbot designed to extract, 
 
 ---
 
-## Preview
-
-         <img width="557" height="772" alt="image" src="https://github.com/user-attachments/assets/bade1343-3fb6-4075-99b6-95210f1808bf" />
-
-
----
-
 ## 🌟 Features
 
 - **Multi-PDF Support:** Upload multiple PDF files simultaneously and query across all of them at once.
