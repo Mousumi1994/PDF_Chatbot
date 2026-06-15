@@ -6,9 +6,8 @@ An AI-powered Retrieval-Augmented Generation (RAG) chatbot designed to extract, 
 
 ## Preview
 
-          <img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/dd6d41fc-cd33-4565-afbb-2c596176f7b7" />
+         <img width="557" height="772" alt="image" src="https://github.com/user-attachments/assets/bade1343-3fb6-4075-99b6-95210f1808bf" />
 
-          <img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/a785f85d-193b-4e4a-be69-fc445b4f117b" />
 
 ---
 
